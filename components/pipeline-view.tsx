@@ -1,7 +1,7 @@
 "use client"
 
 import { useWorkspace, type PipelineItem } from "@/lib/workspace-context"
-import { Kanban, GripVertical, Calendar, Shield } from "lucide-react"
+import { Kanban, GripVertical, Calendar, Shield, Plus } from "lucide-react"
 
 const STAGES: { id: PipelineItem["stage"]; label: string }[] = [
   { id: "new", label: "New" },
@@ -12,38 +12,47 @@ const STAGES: { id: PipelineItem["stage"]; label: string }[] = [
 ]
 
 const STAGE_COLORS: Record<string, string> = {
-  new: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  hot: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  under_contract: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  closed: "bg-secondary text-muted-foreground border-border",
+  new: "bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30",
+  active: "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30",
+  hot: "bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30",
+  under_contract: "bg-violet-500/15 text-violet-400 ring-1 ring-violet-500/30",
+  closed: "bg-secondary text-muted-foreground ring-1 ring-border",
 }
 
 function PipelineCard({ item }: { item: PipelineItem }) {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-400 bg-emerald-500/15"
+    if (score >= 50) return "text-amber-400 bg-amber-500/15"
+    return "text-red-400 bg-red-500/15"
+  }
+
   return (
-    <div className="group p-3 rounded-lg bg-card border border-border hover:border-ring transition-all hover:-translate-y-0.5 cursor-pointer">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">{item.contactName}</p>
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3 shrink-0" />
-            <span>{item.lastTouch}</span>
-          </div>
-        </div>
+    <div className="group p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/70 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-move">
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-sm font-semibold text-foreground flex-1 min-w-0 pr-2">{item.contactName}</p>
         <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
       </div>
-      <p className="text-xs text-muted-foreground mt-2 line-clamp-1">{item.nextAction}</p>
-      {item.credibilityScore > 0 && (
-        <div className="flex items-center gap-1.5 mt-2">
-          <Shield className="h-3 w-3 text-muted-foreground" />
-          <span className={`text-xs font-medium ${
-            item.credibilityScore >= 80 ? "text-emerald-400" :
-            item.credibilityScore >= 50 ? "text-amber-400" : "text-red-400"
-          }`}>
-            {item.credibilityScore}
-          </span>
+
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <span>{item.lastTouch}</span>
         </div>
-      )}
+
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 bg-secondary/50 rounded-lg px-2.5 py-2 border border-border/50">
+          {item.nextAction}
+        </p>
+
+        {item.credibilityScore > 0 && (
+          <div className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg ring-1 ${getScoreColor(item.credibilityScore)}`}>
+            <div className="flex items-center gap-1.5">
+              <Shield className="h-3 w-3" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Credibility</span>
+            </div>
+            <span className="text-xs font-bold">{item.credibilityScore}</span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -57,41 +66,56 @@ export function PipelineView() {
 
   if (wsPipeline.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-3">
-        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
-          <Kanban className="h-8 w-8 text-muted-foreground" />
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 animate-fade-in">
+        <div className="relative">
+          <div className="w-20 h-20 rounded-2xl bg-secondary/50 border border-border/50 flex items-center justify-center backdrop-blur-sm">
+            <Kanban className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <div className="absolute -top-1 -right-1 w-7 h-7 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center">
+            <Plus className="h-4 w-4 text-primary" />
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-foreground">No active pipeline items</h3>
-        <p className="text-sm text-muted-foreground">Add a contact and move them into your workflow.</p>
+        <div className="text-center space-y-2 max-w-md">
+          <h3 className="text-lg font-semibold text-foreground">No Pipeline Items</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Add contacts to your pipeline and track them through your sales stages. Move cards between stages to update their progress.
+          </p>
+        </div>
+        <button className="mt-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Add to Pipeline
+        </button>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 overflow-x-auto p-6">
-      <div className="flex gap-4 min-w-max">
+    <div className="flex-1 overflow-x-auto overflow-y-hidden">
+      <div className="flex gap-4 p-6 min-w-max h-full">
         {STAGES.map((stage) => {
           const stageItems = wsPipeline.filter((p) => p.stage === stage.id)
           return (
-            <div key={stage.id} className="w-64 shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium border ${STAGE_COLORS[stage.id]}`}>
-                    {stage.label}
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground">{stageItems.length}</span>
+            <div key={stage.id} className="w-72 shrink-0 flex flex-col">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <span className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${STAGE_COLORS[stage.id]}`}>
+                  {stage.label}
+                </span>
+                <span className="px-2 py-1 rounded-md text-xs font-semibold bg-secondary/80 text-muted-foreground ring-1 ring-border">
+                  {stageItems.length}
+                </span>
               </div>
-              <div className="space-y-2">
+
+              <div className="flex-1 space-y-3 overflow-y-auto pr-1">
                 {stageItems.map((item) => (
                   <PipelineCard key={item.id} item={item} />
                 ))}
+
+                {stageItems.length === 0 && (
+                  <div className="p-8 rounded-xl border-2 border-dashed border-border/50 text-center bg-secondary/20">
+                    <p className="text-xs text-muted-foreground">Drop here</p>
+                  </div>
+                )}
               </div>
-              {stageItems.length === 0 && (
-                <div className="p-4 rounded-lg border border-dashed border-border text-center">
-                  <p className="text-xs text-muted-foreground">No items</p>
-                </div>
-              )}
             </div>
           )
         })}

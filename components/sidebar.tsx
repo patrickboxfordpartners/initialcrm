@@ -20,19 +20,22 @@ export function Sidebar() {
   ).length
 
   return (
-    <aside className="w-56 border-r border-border bg-card flex flex-col shrink-0">
-      <div className="px-3 py-3 border-b border-border">
-        <div className="flex items-center gap-2">
+    <aside className="w-60 border-r border-border bg-card/30 backdrop-blur-sm flex flex-col shrink-0">
+      <div className="px-4 py-4 border-b border-border/50">
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-secondary/50 border border-border/50">
           {currentWorkspace && (
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: currentWorkspace.color }} />
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+              style={{ backgroundColor: currentWorkspace.color }}
+            />
           )}
-          <span className="text-xs font-medium text-muted-foreground truncate">
+          <span className="text-xs font-semibold text-foreground/90 truncate uppercase tracking-wider">
             {currentWorkspace?.name || "No workspace"}
           </span>
         </div>
       </div>
 
-      <nav className="flex-1 p-2 space-y-0.5">
+      <nav className="flex-1 p-3 space-y-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activePage === item.id
@@ -40,16 +43,16 @@ export function Sidebar() {
             <button
               key={item.id}
               onClick={() => setActivePage(item.id)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group ${
                 isActive
-                  ? "bg-accent text-foreground font-medium"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                  ? "bg-primary/10 text-foreground font-medium ring-1 ring-primary/20 shadow-sm"
+                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? 'text-primary' : 'group-hover:text-foreground'}`} />
               <span>{item.label}</span>
               {item.id === "inbox" && unhandledInbox > 0 && (
-                <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground">
+                <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-md bg-destructive/90 text-destructive-foreground shadow-sm">
                   {unhandledInbox}
                 </span>
               )}
