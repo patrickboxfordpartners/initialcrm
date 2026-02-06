@@ -1,18 +1,21 @@
 #!/bin/bash
+set -e
 cd /vercel/share/v0-project
-# List zip contents first to understand structure
-unzip -l initialcrm-main.zip | head -50
-echo "---"
-# Extract the zip, overwriting existing files
+
+echo "=== Extracting initialcrm-main.zip ==="
 unzip -o initialcrm-main.zip
-# Check if files are in a subdirectory
+
+# If files are nested in a subdirectory, move them up
 if [ -d "initialcrm-main" ]; then
-  echo "Moving files from initialcrm-main/ to project root..."
-  # Use rsync-like approach: copy all contents to root
-  cp -r initialcrm-main/* . 2>/dev/null
-  cp -r initialcrm-main/.* . 2>/dev/null
+  echo "=== Moving files from initialcrm-main/ to root ==="
+  shopt -s dotglob
+  cp -rn initialcrm-main/* . 2>/dev/null || true
   rm -rf initialcrm-main
 fi
-# List what we have now
-echo "=== Project structure after extraction ==="
-find . -maxdepth 3 -not -path './node_modules/*' -not -path './.next/*' -not -path './user_read_only_context/*' | head -80
+
+echo "=== Done. Listing top-level structure ==="
+ls -la
+echo "=== Checking for app directory ==="
+ls -la app/ 2>/dev/null || echo "No app directory found"
+echo "=== Checking for pages directory ==="
+ls -la pages/ 2>/dev/null || echo "No pages directory found"
