@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "InitialCRM",
-  description: "Customer Relationship Management",
+  description: "Multi-workspace Customer Relationship Management",
 }
 
 export default function RootLayout({
