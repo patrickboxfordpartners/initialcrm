@@ -190,9 +190,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .catch(console.error)
   }, [user, workspaces.length])
 
-  useEffect(() => {
-    if (!currentWorkspace) return
-    fetch(`/api/contacts?workspace_id=${currentWorkspace.id}`)
+  const loadContacts = useCallback((workspaceId: string) => {
+    fetch(`/api/contacts?workspace_id=${workspaceId}`)
       .then(r => r.json())
       .then(({ contacts: rows }) => {
         if (!rows) return
@@ -220,7 +219,20 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setContacts(mapped)
       })
       .catch(err => console.error('Failed to load contacts:', err))
-  }, [currentWorkspace?.id])
+  }, [])
+
+  useEffect(() => {
+    if (!currentWorkspace) return
+    loadContacts(currentWorkspace.id)
+  }, [currentWorkspace?.id, loadContacts])
+
+  // Reload contacts when the tab regains focus (picks up externally added contacts)
+  useEffect(() => {
+    if (!currentWorkspace) return
+    const handleFocus = () => loadContacts(currentWorkspace.id)
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [currentWorkspace?.id, loadContacts])
 
   const addContact = useCallback((contact: Omit<Contact, "id" | "activities">) => {
     setContacts((prev) => [...prev, { ...contact, id: `c-${Date.now()}`, activities: [] }])
