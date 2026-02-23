@@ -226,12 +226,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     loadContacts(currentWorkspace.id)
   }, [currentWorkspace?.id, loadContacts])
 
-  // Reload contacts when the tab regains focus (picks up externally added contacts)
+  // Reload contacts when the tab becomes visible (picks up externally added contacts)
   useEffect(() => {
     if (!currentWorkspace) return
-    const handleFocus = () => loadContacts(currentWorkspace.id)
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
+    const id = currentWorkspace.id
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadContacts(id)
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [currentWorkspace?.id, loadContacts])
 
   const addContact = useCallback((contact: Omit<Contact, "id" | "activities">) => {
