@@ -190,6 +190,38 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .catch(console.error)
   }, [user, workspaces.length])
 
+  useEffect(() => {
+    if (!currentWorkspace) return
+    fetch(`/api/contacts?workspace_id=${currentWorkspace.id}`)
+      .then(r => r.json())
+      .then(({ contacts: rows }) => {
+        if (!rows) return
+        const mapped: Contact[] = rows.map((c: any) => ({
+          id: c.id,
+          workspaceId: c.workspace_id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone || '',
+          tags: c.tags || [],
+          status: c.status,
+          source: c.source || '',
+          trustSignals: c.trust_signals || [],
+          nextAction: c.next_action || '',
+          nextActionDate: c.next_action_date || '',
+          lastActivity: c.last_activity || '',
+          credibilityScore: c.credibility_score || 0,
+          activities: (c.activities || []).map((a: any) => ({
+            id: a.id,
+            type: a.type,
+            description: a.description,
+            date: a.date,
+          })),
+        }))
+        setContacts(mapped)
+      })
+      .catch(err => console.error('Failed to load contacts:', err))
+  }, [currentWorkspace?.id])
+
   const addContact = useCallback((contact: Omit<Contact, "id" | "activities">) => {
     setContacts((prev) => [...prev, { ...contact, id: `c-${Date.now()}`, activities: [] }])
   }, [])
