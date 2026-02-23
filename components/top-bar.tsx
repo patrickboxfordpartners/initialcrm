@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useWorkspace, type WorkspaceType } from "@/lib/workspace-context"
 import { ChevronDown, Plus, Building2, X } from "lucide-react"
+import { UserButton } from "@clerk/nextjs"
 
 const PAGE_TITLES: Record<string, string> = {
   contacts: "Contacts",
@@ -41,6 +42,8 @@ export function TopBar() {
       <div className="flex-1 flex justify-center">
         <span className="text-sm font-medium text-foreground/80">{PAGE_TITLES[activePage] || "Contacts"}</span>
       </div>
+
+      <UserButton afterSignOutUrl="/sign-in" />
 
       <div className="relative">
         <button
