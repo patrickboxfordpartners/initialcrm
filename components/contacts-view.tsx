@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { useWorkspace, type Contact } from "@/lib/workspace-context"
-import { Search, Plus, User, Phone, Mail, Tag, ChevronRight, X, Calendar, Shield } from "lucide-react"
+import { Search, Plus, User, Phone, Mail, Tag, ChevronRight, X, Calendar, Shield, Trash2 } from "lucide-react"
 
-function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => void }) {
+function ContactDetail({ contact, onClose, onDelete }: { contact: Contact; onClose: () => void; onDelete: (id: string) => void }) {
+  const [confirming, setConfirming] = useState(false)
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-400"
     if (score >= 50) return "text-amber-400"
@@ -30,12 +31,39 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
             {contact.status}
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-secondary/50"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {confirming ? (
+            <>
+              <span className="text-xs text-muted-foreground mr-1">Delete?</span>
+              <button
+                onClick={() => { onDelete(contact.id); onClose(); }}
+                className="text-xs px-2 py-1 rounded-md bg-red-500/15 text-red-400 ring-1 ring-red-500/30 hover:bg-red-500/25 transition-colors"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setConfirming(false)}
+                className="text-xs px-2 py-1 rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                No
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setConfirming(true)}
+              className="text-muted-foreground hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10"
+              title="Delete contact"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-secondary/50"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-6">
@@ -150,7 +178,7 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
 }
 
 export function ContactsView() {
-  const { contacts, currentWorkspace } = useWorkspace()
+  const { contacts, currentWorkspace, deleteContact } = useWorkspace()
   const [search, setSearch] = useState("")
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -297,7 +325,7 @@ export function ContactsView() {
       </div>
 
       {selectedContact && (
-        <ContactDetail contact={selectedContact} onClose={() => setSelectedContact(null)} />
+        <ContactDetail contact={selectedContact} onClose={() => setSelectedContact(null)} onDelete={deleteContact} />
       )}
     </div>
   )

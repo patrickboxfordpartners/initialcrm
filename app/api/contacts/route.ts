@@ -53,3 +53,24 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+// DELETE /api/contacts?id=<uuid>
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+
+  if (!id) {
+    return NextResponse.json({ error: 'id is required' }, { status: 400 })
+  }
+
+  try {
+    await sql`DELETE FROM contacts WHERE id = ${id}`
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting contact:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete contact', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
+  }
+}

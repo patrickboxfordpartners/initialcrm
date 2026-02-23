@@ -78,6 +78,7 @@ interface WorkspaceContextType {
   createWorkspace: (name: string, type: WorkspaceType) => void
   contacts: Contact[]
   addContact: (contact: Omit<Contact, "id" | "activities">) => void
+  deleteContact: (id: string) => Promise<void>
   pipeline: PipelineItem[]
   movePipelineItem: (id: string, stage: PipelineItem["stage"]) => void
   tasks: Task[]
@@ -241,6 +242,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setContacts((prev) => [...prev, { ...contact, id: `c-${Date.now()}`, activities: [] }])
   }, [])
 
+  const deleteContact = useCallback(async (id: string) => {
+    await fetch(`/api/contacts?id=${id}`, { method: 'DELETE' })
+    setContacts((prev) => prev.filter((c) => c.id !== id))
+  }, [])
+
   const movePipelineItem = useCallback((id: string, stage: PipelineItem["stage"]) => {
     setPipeline((prev) => prev.map((item) => (item.id === id ? { ...item, stage } : item)))
   }, [])
@@ -261,7 +267,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     <WorkspaceContext.Provider
       value={{
         workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace,
-        contacts, addContact, pipeline, movePipelineItem,
+        contacts, addContact, deleteContact, pipeline, movePipelineItem,
         tasks, toggleTask, addTask, inbox, handleInboxItem,
         activePage, setActivePage, loading,
       }}
