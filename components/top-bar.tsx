@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useWorkspace, type WorkspaceType } from "@/lib/workspace-context"
-import { ChevronDown, Plus, Building2, X } from "lucide-react"
+import { ChevronDown, Plus, Building2, X, Trash2 } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 
 const PAGE_TITLES: Record<string, string> = {
@@ -15,7 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
 }
 
 export function TopBar() {
-  const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace, activePage } = useWorkspace()
+  const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace, deleteWorkspace, activePage } = useWorkspace()
   const [open, setOpen] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState("")
@@ -67,22 +67,32 @@ export function TopBar() {
               <div className="p-1.5">
                 <div className="text-xs font-medium text-muted-foreground px-3 py-2 uppercase tracking-wider">Workspaces</div>
                 {workspaces.map((ws) => (
-                  <button
-                    key={ws.id}
-                    onClick={() => { setCurrentWorkspace(ws); setOpen(false); setShowCreate(false) }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${
-                      currentWorkspace?.id === ws.id
-                        ? "bg-primary/10 text-foreground ring-1 ring-primary/20"
-                        : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                    }`}
-                  >
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
-                      style={{ backgroundColor: ws.color }}
-                    />
-                    <span className="font-medium">{ws.name}</span>
-                    <span className="ml-auto text-xs text-muted-foreground/60 uppercase tracking-wide">{ws.type}</span>
-                  </button>
+                  <div key={ws.id} className="flex items-center group">
+                    <button
+                      onClick={() => { setCurrentWorkspace(ws); setOpen(false); setShowCreate(false) }}
+                      className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${
+                        currentWorkspace?.id === ws.id
+                          ? "bg-primary/10 text-foreground ring-1 ring-primary/20"
+                          : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      }`}
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+                        style={{ backgroundColor: ws.color }}
+                      />
+                      <span className="font-medium">{ws.name}</span>
+                      <span className="ml-auto text-xs text-muted-foreground/60 uppercase tracking-wide">{ws.type}</span>
+                    </button>
+                    {workspaces.length > 1 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${ws.name}" and all its contacts?`)) { deleteWorkspace(ws.id); setOpen(false) } }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 ml-1 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-md"
+                        title="Delete workspace"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="border-t border-border/50 p-1.5">

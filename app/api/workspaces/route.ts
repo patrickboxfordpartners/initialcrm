@@ -3,6 +3,20 @@ import { sql } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
+// DELETE /api/workspaces?id=<uuid>
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
+
+  try {
+    await sql`DELETE FROM workspaces WHERE id = ${id}`
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete workspace' }, { status: 500 })
+  }
+}
+
 // GET /api/workspaces?clerk_user_id=xxx
 export async function GET(request: NextRequest) {
   try {

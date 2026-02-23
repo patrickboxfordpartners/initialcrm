@@ -76,6 +76,7 @@ interface WorkspaceContextType {
   currentWorkspace: Workspace | null
   setCurrentWorkspace: (ws: Workspace) => void
   createWorkspace: (name: string, type: WorkspaceType) => void
+  deleteWorkspace: (id: string) => void
   contacts: Contact[]
   addContact: (contact: Omit<Contact, "id" | "activities">) => void
   deleteContact: (id: string) => Promise<void>
@@ -239,6 +240,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [currentWorkspace?.id, loadContacts])
 
+  const deleteWorkspace = useCallback((id: string) => {
+    if (workspaces.length <= 1) return // never delete the last one
+    fetch(`/api/workspaces?id=${id}`, { method: 'DELETE' }).catch(console.error)
+    setWorkspaces((prev) => {
+      const remaining = prev.filter((w) => w.id !== id)
+      if (currentWorkspace?.id === id) setCurrentWorkspace(remaining[0])
+      return remaining
+    })
+    setContacts((prev) => prev.filter((c) => c.workspaceId !== id))
+  }, [workspaces.length, currentWorkspace?.id])
+
   const addContact = useCallback((contact: Omit<Contact, "id" | "activities">) => {
     setContacts((prev) => [...prev, { ...contact, id: `c-${Date.now()}`, activities: [] }])
   }, [])
@@ -272,7 +284,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   return (
     <WorkspaceContext.Provider
       value={{
-        workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace,
+        workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace, deleteWorkspace,
         contacts, addContact, deleteContact, updateContactName, pipeline, movePipelineItem,
         tasks, toggleTask, addTask, inbox, handleInboxItem,
         activePage, setActivePage, loading,
