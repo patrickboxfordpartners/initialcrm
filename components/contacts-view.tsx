@@ -2,10 +2,19 @@
 
 import { useState } from "react"
 import { useWorkspace, type Contact } from "@/lib/workspace-context"
-import { Search, Plus, User, Phone, Mail, Tag, ChevronRight, X, Calendar, Shield, Trash2 } from "lucide-react"
+import { Search, Plus, User, Phone, Mail, Tag, ChevronRight, X, Calendar, Shield, Trash2, Pencil, Check } from "lucide-react"
 
-function ContactDetail({ contact, onClose, onDelete }: { contact: Contact; onClose: () => void; onDelete: (id: string) => void }) {
+function ContactDetail({ contact, onClose, onDelete, onRename }: { contact: Contact; onClose: () => void; onDelete: (id: string) => void; onRename: (id: string, name: string) => void }) {
   const [confirming, setConfirming] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameValue, setNameValue] = useState(contact.name)
+
+  const submitRename = () => {
+    if (nameValue.trim() && nameValue.trim() !== contact.name) {
+      onRename(contact.id, nameValue.trim())
+    }
+    setEditingName(false)
+  }
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-400"
     if (score >= 50) return "text-amber-400"
@@ -22,7 +31,23 @@ function ContactDetail({ contact, onClose, onDelete }: { contact: Contact; onClo
     <div className="w-[420px] border-l border-border bg-card/30 backdrop-blur-sm flex flex-col shrink-0 animate-slide-in">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
         <div>
-          <h3 className="text-base font-semibold text-foreground">{contact.name}</h3>
+          {editingName ? (
+            <div className="flex items-center gap-1">
+              <input
+                autoFocus
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submitRename(); if (e.key === 'Escape') setEditingName(false); }}
+                className="text-base font-semibold bg-secondary/80 border border-primary/50 rounded-md px-2 py-0.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-48"
+              />
+              <button onClick={submitRename} className="text-primary hover:text-primary/80 p-0.5"><Check className="h-3.5 w-3.5" /></button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 group">
+              <h3 className="text-base font-semibold text-foreground">{contact.name}</h3>
+              <button onClick={() => setEditingName(true)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-0.5"><Pencil className="h-3 w-3" /></button>
+            </div>
+          )}
           <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider mt-1 ${
             contact.status === "active" ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30" :
             contact.status === "lead" ? "bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30" :
@@ -178,7 +203,7 @@ function ContactDetail({ contact, onClose, onDelete }: { contact: Contact; onClo
 }
 
 export function ContactsView() {
-  const { contacts, currentWorkspace, deleteContact } = useWorkspace()
+  const { contacts, currentWorkspace, deleteContact, updateContactName } = useWorkspace()
   const [search, setSearch] = useState("")
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -325,7 +350,7 @@ export function ContactsView() {
       </div>
 
       {selectedContact && (
-        <ContactDetail contact={selectedContact} onClose={() => setSelectedContact(null)} onDelete={deleteContact} />
+        <ContactDetail contact={selectedContact} onClose={() => setSelectedContact(null)} onDelete={deleteContact} onRename={updateContactName} />
       )}
     </div>
   )

@@ -79,6 +79,7 @@ interface WorkspaceContextType {
   contacts: Contact[]
   addContact: (contact: Omit<Contact, "id" | "activities">) => void
   deleteContact: (id: string) => Promise<void>
+  updateContactName: (id: string, name: string) => Promise<void>
   pipeline: PipelineItem[]
   movePipelineItem: (id: string, stage: PipelineItem["stage"]) => void
   tasks: Task[]
@@ -113,7 +114,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
     const load = async () => {
       try {
-        const res = await fetch(`/api/workspaces?clerk_user_id=${user.id}`)
+        const res = await fetch(`/api/workspaces?clerk_user_id=${user.id}`, { cache: 'no-store' })
         const { workspaces: dbWorkspaces } = await res.json()
 
         if (dbWorkspaces && dbWorkspaces.length > 0) {
@@ -247,6 +248,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setContacts((prev) => prev.filter((c) => c.id !== id))
   }, [])
 
+  const updateContactName = useCallback(async (id: string, name: string) => {
+    await fetch(`/api/contacts?id=${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) })
+    setContacts((prev) => prev.map((c) => c.id === id ? { ...c, name } : c))
+  }, [])
+
   const movePipelineItem = useCallback((id: string, stage: PipelineItem["stage"]) => {
     setPipeline((prev) => prev.map((item) => (item.id === id ? { ...item, stage } : item)))
   }, [])
@@ -267,7 +273,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     <WorkspaceContext.Provider
       value={{
         workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace,
-        contacts, addContact, deleteContact, pipeline, movePipelineItem,
+        contacts, addContact, deleteContact, updateContactName, pipeline, movePipelineItem,
         tasks, toggleTask, addTask, inbox, handleInboxItem,
         activePage, setActivePage, loading,
       }}

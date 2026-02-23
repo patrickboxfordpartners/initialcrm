@@ -54,6 +54,21 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// PATCH /api/contacts?id=<uuid>
+export async function PATCH(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
+
+  try {
+    const { name } = await request.json()
+    await sql`UPDATE contacts SET name = ${name}, updated_at = NOW() WHERE id = ${id}`
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })
+  }
+}
+
 // DELETE /api/contacts?id=<uuid>
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
