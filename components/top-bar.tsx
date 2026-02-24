@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { useWorkspace, type WorkspaceType } from "@/lib/workspace-context"
-import { ChevronDown, Plus, Building2, X } from "lucide-react"
+import { ChevronDown, Plus, Building2, X, Moon, Sun } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
+import { useTheme } from "next-themes"
 
 const PAGE_TITLES: Record<string, string> = {
   contacts: "Contacts",
@@ -16,6 +17,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function TopBar() {
   const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace, activePage } = useWorkspace()
+  const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState("")
@@ -39,6 +41,16 @@ export function TopBar() {
       </div>
 
       <div className="flex-1" />
+
+      <button
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        aria-label="Toggle dark mode"
+      >
+        <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+        <span className="sr-only">Toggle theme</span>
+      </button>
 
       <UserButton afterSignOutUrl="/sign-in" />
 
