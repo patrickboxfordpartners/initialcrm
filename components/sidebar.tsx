@@ -20,22 +20,22 @@ export function Sidebar() {
   ).length
 
   return (
-    <aside className="w-60 border-r border-border bg-card/30 backdrop-blur-sm flex flex-col shrink-0">
-      <div className="px-4 py-4 border-b border-border/50">
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-secondary/50 border border-border/50">
+    <aside className="w-[240px] bg-sidebar flex flex-col shrink-0">
+      <div className="px-5 py-5 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
           {currentWorkspace && (
             <span
-              className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+              className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: currentWorkspace.color }}
             />
           )}
-          <span className="text-xs font-semibold text-foreground/90 truncate uppercase tracking-wider">
+          <span className="text-[11px] font-medium text-sidebar-foreground/70 truncate uppercase tracking-[0.15em]">
             {currentWorkspace?.name || "No workspace"}
           </span>
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activePage === item.id
@@ -43,16 +43,16 @@ export function Sidebar() {
             <button
               key={item.id}
               onClick={() => setActivePage(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-[13px] transition-all duration-150 group ${
                 isActive
-                  ? "bg-primary/10 text-foreground font-medium ring-1 ring-primary/20 shadow-sm"
-                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               }`}
             >
-              <Icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? 'text-primary' : 'group-hover:text-foreground'}`} />
-              <span>{item.label}</span>
+              <Icon className={`h-[18px] w-[18px] shrink-0 transition-colors ${isActive ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'}`} strokeWidth={1.5} />
+              <span className="tracking-wide">{item.label}</span>
               {item.id === "inbox" && unhandledInbox > 0 && (
-                <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-md bg-destructive/90 text-destructive-foreground shadow-sm">
+                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground leading-none">
                   {unhandledInbox}
                 </span>
               )}
@@ -60,6 +60,10 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      <div className="px-5 py-4 border-t border-sidebar-border">
+        <p className="text-[10px] text-sidebar-foreground/30 uppercase tracking-[0.15em]">Boxford CRM</p>
+      </div>
     </aside>
   )
 }

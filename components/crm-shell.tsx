@@ -33,11 +33,11 @@ function MainContent() {
 
 export function CrmShell() {
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <TopBar />
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 flex flex-col overflow-hidden">
+    <div className="h-screen flex overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <TopBar />
+        <main className="flex-1 flex flex-col overflow-hidden bg-background">
           <MainContent />
         </main>
       </div>

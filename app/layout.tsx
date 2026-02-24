@@ -1,21 +1,26 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Inter, Source_Serif_4 } from "next/font/google"
 import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css"
 
-const geistSans = Geist({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-inter",
 })
 
-const geistMono = Geist_Mono({
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  variable: "--font-serif",
+  weight: ["400", "600", "700"],
 })
 
 export const metadata: Metadata = {
-  title: "boxfordCRM",
-  description: "Credibility-driven CRM for multi-workspace relationship management",
+  title: "Boxford CRM",
+  description: "Institutional-grade relationship management for high-performance teams",
+}
+
+export const viewport: Viewport = {
+  themeColor: "#1a2236",
 }
 
 export default function RootLayout({
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        <body className={`${inter.variable} ${sourceSerif.variable} font-sans antialiased`}>
           {children}
         </body>
       </html>

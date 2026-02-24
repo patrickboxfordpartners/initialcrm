@@ -31,28 +31,25 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-14 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-6 gap-4 shrink-0">
-      <div className="flex items-center gap-2.5">
-        <div className="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10">
-          <Building2 className="h-4 w-4 text-primary" />
-        </div>
-        <span className="font-semibold text-sm text-foreground tracking-tight">boxfordCRM</span>
+    <header className="h-14 border-b border-border bg-card flex items-center px-6 gap-4 shrink-0">
+      <div className="flex items-center gap-3">
+        <span className="font-serif text-lg font-semibold text-foreground tracking-tight">Boxford</span>
+        <span className="text-border">|</span>
+        <span className="text-[13px] font-medium text-muted-foreground">{PAGE_TITLES[activePage] || "Contacts"}</span>
       </div>
 
-      <div className="flex-1 flex justify-center">
-        <span className="text-sm font-medium text-foreground/80">{PAGE_TITLES[activePage] || "Contacts"}</span>
-      </div>
+      <div className="flex-1" />
 
       <UserButton afterSignOutUrl="/sign-in" />
 
       <div className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-sm font-medium text-foreground bg-secondary/80 hover:bg-secondary transition-all duration-150 border border-border/50 shadow-sm hover:shadow"
+          className="flex items-center gap-2.5 px-3.5 py-2 rounded-md text-[13px] font-medium text-foreground bg-background hover:bg-secondary transition-all duration-150 border border-border"
         >
           {currentWorkspace && (
             <span
-              className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+              className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: currentWorkspace.color }}
             />
           )}
@@ -63,46 +60,44 @@ export function TopBar() {
         {open && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setShowCreate(false) }} />
-            <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-border bg-popover/95 backdrop-blur-sm shadow-2xl z-50 animate-fade-in overflow-hidden">
+            <div className="absolute right-0 top-full mt-2 w-72 rounded-lg border border-border bg-popover shadow-xl z-50 animate-fade-in overflow-hidden">
               <div className="p-1.5">
-                <div className="text-xs font-medium text-muted-foreground px-3 py-2 uppercase tracking-wider">Workspaces</div>
+                <div className="text-[10px] font-medium text-muted-foreground px-3 py-2 uppercase tracking-[0.15em]">Workspaces</div>
                 {workspaces.map((ws) => (
                   <button
                     key={ws.id}
                     onClick={() => { setCurrentWorkspace(ws); setOpen(false); setShowCreate(false) }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-[13px] transition-all duration-150 ${
                       currentWorkspace?.id === ws.id
-                        ? "bg-primary/10 text-foreground ring-1 ring-primary/20"
-                        : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                        ? "bg-primary/5 text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     }`}
                   >
                     <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+                      className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: ws.color }}
                     />
-                    <span className="font-medium">{ws.name}</span>
-                    <span className="ml-auto text-xs text-muted-foreground/60 uppercase tracking-wide">{ws.type}</span>
+                    <span>{ws.name}</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground/60 uppercase tracking-[0.1em]">{ws.type}</span>
                   </button>
                 ))}
               </div>
-              <div className="border-t border-border/50 p-1.5">
+              <div className="border-t border-border p-1.5">
                 {!showCreate ? (
                   <button
                     onClick={() => setShowCreate(true)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-150"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-150"
                   >
-                    <div className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/10">
-                      <Plus className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <Plus className="h-3.5 w-3.5" />
                     <span className="font-medium">Create New Workspace</span>
                   </button>
                 ) : (
-                  <div className="p-3 space-y-3">
+                  <div className="p-3 flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-foreground uppercase tracking-wider">New Workspace</span>
+                      <span className="text-[11px] font-semibold text-foreground uppercase tracking-[0.1em]">New Workspace</span>
                       <button
                         onClick={() => setShowCreate(false)}
-                        className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded hover:bg-secondary/50"
+                        className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded hover:bg-secondary"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -112,14 +107,14 @@ export function TopBar() {
                       placeholder="Workspace name"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      className="w-full px-3 py-2 text-[13px] rounded-md bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                       autoFocus
                       onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                     />
                     <select
                       value={newType}
                       onChange={(e) => setNewType(e.target.value as WorkspaceType)}
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      className="w-full px-3 py-2 text-[13px] rounded-md bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                     >
                       <option value="Real Estate">Real Estate</option>
                       <option value="Consulting">Consulting</option>
@@ -129,7 +124,7 @@ export function TopBar() {
                     <button
                       onClick={handleCreate}
                       disabled={!newName.trim()}
-                      className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full px-3 py-2 text-[13px] font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Create Workspace
                     </button>
