@@ -18,7 +18,7 @@ A credibility-driven, multi-workspace CRM by Boxford Partners.
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Clerk
 - **Deployment**: Vercel
-- **Hosting**: app.boxfordpartners.com
+- **Hosting**: crm.boxfordpartners.com
 
 ## Current Status
 
@@ -33,7 +33,7 @@ A credibility-driven, multi-workspace CRM by Boxford Partners.
 - ✅ Clerk authentication configured
 - ✅ Deployment setup for Vercel
 - ⏳ Database API routes (next step)
-- ⏳ Deploy to app.boxfordpartners.com
+- ⏳ Deploy to crm.boxfordpartners.com
 
 📋 **Phase 3 Planned - Commercial Product**
 - Multi-user workspaces
@@ -52,7 +52,7 @@ Open http://localhost:3000
 
 ## Deployment
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions to app.boxfordpartners.com.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions to crm.boxfordpartners.com.
 
 ### Quick Deploy Checklist
 
@@ -61,7 +61,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions to app
 3. ✅ Push to GitHub
 4. ✅ Import to Vercel
 5. ✅ Add environment variables
-6. ✅ Configure app.boxfordpartners.com domain
+6. ✅ Configure crm.boxfordpartners.com domain
 7. ✅ Sign up and start using!
 
 ## Project Structure

@@ -1,6 +1,6 @@
 # boxfordCRM Deployment Guide
 
-Deploy boxfordCRM at app.boxfordpartners.com
+Deploy boxfordCRM at crm.boxfordpartners.com
 
 ## Prerequisites
 
@@ -86,7 +86,7 @@ Deploy boxfordCRM at app.boxfordpartners.com
 ## Step 4: Configure Custom Domain
 
 1. **In Vercel Project Settings → Domains**:
-   - Add domain: `app.boxfordpartners.com`
+   - Add domain: `crm.boxfordpartners.com`
 
 2. **In your DNS provider** (wherever boxfordpartners.com is hosted):
    - Add CNAME record:
@@ -98,16 +98,16 @@ Deploy boxfordCRM at app.boxfordpartners.com
 
 4. **Update Clerk allowed origins**:
    - Go to Clerk Dashboard → API Keys
-   - Add `https://app.boxfordpartners.com` to allowed origins
+   - Add `https://crm.boxfordpartners.com` to allowed origins
 
 ---
 
 ## Step 5: Create Your User Account
 
-1. **Go to**: `https://app.boxfordpartners.com/sign-up`
+1. **Go to**: `https://crm.boxfordpartners.com/sign-up`
 2. **Create account** with your email
 3. **Verify email** (check spam if needed)
-4. **Sign in** at `https://app.boxfordpartners.com/sign-in`
+4. **Sign in** at `https://crm.boxfordpartners.com/sign-in`
 
 ---
 
@@ -127,7 +127,7 @@ I can create a seed script that inserts the demo data you've been seeing in deve
 ## Post-Deployment
 
 ### Verify Everything Works
-- [ ] Can access app.boxfordpartners.com
+- [ ] Can access crm.boxfordpartners.com
 - [ ] Sign-in page loads
 - [ ] Can create account
 - [ ] Can create workspaces

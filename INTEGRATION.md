@@ -28,7 +28,7 @@ After a user submits the lead form on reviewSNIPER, POST the lead to boxfordCRM.
 
 ```typescript
 // After saving to Supabase, send to boxfordCRM
-const boxfordCrmResponse = await fetch('https://app.boxfordpartners.com/api/leads', {
+const boxfordCrmResponse = await fetch('https://crm.boxfordpartners.com/api/leads', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ After Gravitas classifies an inquiry, POST it to boxfordCRM inbox.
 const classification = await classifyInquiry(inquiry)
 
 // Send to boxfordCRM
-await fetch('https://app.boxfordpartners.com/api/inbox', {
+await fetch('https://crm.boxfordpartners.com/api/inbox', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ After someone submits the contact form on boxfordpartners.com.
 
 ```typescript
 // After form submission
-await fetch('https://app.boxfordpartners.com/api/leads', {
+await fetch('https://crm.boxfordpartners.com/api/leads', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ const WORKSPACE_IDS = {
 ### Option 2: API Lookup
 
 ```typescript
-const response = await fetch('https://app.boxfordpartners.com/api/workspaces?user_id=clerk-user-id')
+const response = await fetch('https://crm.boxfordpartners.com/api/workspaces?user_id=clerk-user-id')
 const { workspaces } = await response.json()
 
 const realEstateWorkspace = workspaces.find(w => w.type === 'Real Estate')
@@ -292,7 +292,7 @@ Mark inbox item as handled.
 ### Test Lead Creation
 
 ```bash
-curl -X POST https://app.boxfordpartners.com/api/leads \
+curl -X POST https://crm.boxfordpartners.com/api/leads \
   -H "Content-Type: application/json" \
   -d '{
     "source": "reviewsniper",
@@ -307,7 +307,7 @@ curl -X POST https://app.boxfordpartners.com/api/leads \
 ### Test Inbox Creation
 
 ```bash
-curl -X POST https://app.boxfordpartners.com/api/inbox \
+curl -X POST https://crm.boxfordpartners.com/api/inbox \
   -H "Content-Type: application/json" \
   -d '{
     "workspace_id": "your-workspace-id",

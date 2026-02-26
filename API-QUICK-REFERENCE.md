@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-https://app.boxfordpartners.com/api
+https://crm.boxfordpartners.com/api
 ```
 
 ---
@@ -146,14 +146,14 @@ https://app.boxfordpartners.com/api
 
 ### Test reviewSNIPER lead:
 ```bash
-curl -X POST https://app.boxfordpartners.com/api/leads \
+curl -X POST https://crm.boxfordpartners.com/api/leads \
   -H "Content-Type: application/json" \
   -d '{"source":"reviewsniper","workspace_id":"UUID","name":"Test","email":"test@example.com"}'
 ```
 
 ### Test Gravitas opportunity:
 ```bash
-curl -X POST https://app.boxfordpartners.com/api/inbox \
+curl -X POST https://crm.boxfordpartners.com/api/inbox \
   -H "Content-Type: application/json" \
   -d '{"workspace_id":"UUID","from":"test@example.com","subject":"Inquiry","classification":"opportunity","contact_info":{"name":"Test","email":"test@example.com"}}'
 ```
@@ -171,5 +171,5 @@ WHERE owner_id = 'your-clerk-user-id';
 
 Or via API:
 ```bash
-curl https://app.boxfordpartners.com/api/workspaces?user_id=YOUR_CLERK_USER_ID
+curl https://crm.boxfordpartners.com/api/workspaces?user_id=YOUR_CLERK_USER_ID
 ```
