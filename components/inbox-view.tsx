@@ -1,7 +1,8 @@
 "use client"
 
-import { useWorkspace } from "@/lib/workspace-context"
-import { Inbox, Check, UserPlus, AlertTriangle, Sparkles, Shield, Volume2, ExternalLink } from "lucide-react"
+import { useState } from "react"
+import { useWorkspace, type InboxItem } from "@/lib/workspace-context"
+import { Inbox, Check, UserPlus, AlertTriangle, Sparkles, Shield, Volume2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react"
 
 const CLASSIFICATION_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: typeof AlertTriangle }> = {
   noise: { label: "Noise", color: "text-muted-foreground", bgColor: "bg-secondary/80 ring-border", icon: Volume2 },
@@ -10,8 +11,94 @@ const CLASSIFICATION_CONFIG: Record<string, { label: string; color: string; bgCo
   reputation: { label: "Reputation", color: "text-blue-400", bgColor: "bg-blue-500/15 ring-blue-500/30", icon: Shield },
 }
 
+function SignalItem({ label, value }: { label: string; value: string }) {
+  return (
+    <li>
+      <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+      <p className="mt-0.5 text-sm text-foreground">{value}</p>
+    </li>
+  )
+}
+
+function SignalPanel({ item }: { item: InboxItem }) {
+  const signals = item.signals ?? {}
+  const hasSignals =
+    signals.timelineClarity ||
+    signals.locationSpecificity ||
+    signals.propertyClarity ||
+    (signals.readinessIndicators as string[] | undefined)?.length ||
+    (signals.riskTriggers as string[] | undefined)?.length
+
+  return (
+    <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
+      {/* Full text */}
+      {item.fullText && (
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Full Message</p>
+          <div className="p-3 rounded-lg bg-secondary/40 border border-border/50 text-sm text-foreground leading-relaxed font-mono max-h-40 overflow-y-auto">
+            {item.fullText}
+          </div>
+        </div>
+      )}
+
+      {/* Signal analysis */}
+      {hasSignals && (
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Signal Analysis</p>
+          <ul className="space-y-3">
+            {signals.timelineClarity && (
+              <SignalItem label="Timeline Clarity" value={signals.timelineClarity as string} />
+            )}
+            {signals.locationSpecificity && (
+              <SignalItem label="Location Specificity" value={signals.locationSpecificity as string} />
+            )}
+            {signals.propertyClarity && (
+              <SignalItem label="Property Clarity" value={signals.propertyClarity as string} />
+            )}
+            {(signals.readinessIndicators as string[] | undefined)?.length ? (
+              <li>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Readiness Indicators</span>
+                <ul className="mt-1.5 space-y-1">
+                  {(signals.readinessIndicators as string[]).map((indicator, i) => (
+                    <li key={i} className="text-sm text-foreground flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+                      {indicator}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ) : null}
+            {(signals.riskTriggers as string[] | undefined)?.length ? (
+              <li>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Risk Triggers</span>
+                <ul className="mt-1.5 space-y-1">
+                  {(signals.riskTriggers as string[]).map((trigger, i) => (
+                    <li key={i} className="text-sm text-foreground flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0" />
+                      {trigger}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ) : null}
+          </ul>
+        </div>
+      )}
+
+      {/* Rationale */}
+      {item.rationale && (
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Rationale</p>
+          <p className="text-sm text-foreground/80 leading-relaxed">{item.rationale}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function InboxView() {
   const { inbox, handleInboxItem, currentWorkspace } = useWorkspace()
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const wsInbox = inbox.filter((item) => item.workspaceId === currentWorkspace?.id)
   const unhandled = wsInbox.filter((item) => !item.handled)
@@ -37,7 +124,7 @@ export function InboxView() {
           </p>
         </div>
         <a
-          href="https://gravitas.example.com"
+          href="https://gravitasindex.com"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
@@ -48,6 +135,9 @@ export function InboxView() {
       </div>
     )
   }
+
+  const hasDetail = (item: InboxItem) =>
+    !!item.fullText || !!item.rationale || !!(item.signals && Object.keys(item.signals).length > 0)
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -67,6 +157,8 @@ export function InboxView() {
             {unhandled.map((item) => {
               const config = CLASSIFICATION_CONFIG[item.classification]
               const Icon = config.icon
+              const isExpanded = expandedId === item.id
+              const expandable = hasDetail(item)
               return (
                 <div key={item.id} className="px-6 py-5 hover:bg-secondary/30 transition-all duration-150 group">
                   <div className="flex items-start justify-between gap-4">
@@ -88,8 +180,18 @@ export function InboxView() {
                           <span className="text-primary">Recommended:</span> {item.recommendedAction}
                         </p>
                       </div>
+                      {expandable && isExpanded && <SignalPanel item={item} />}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {expandable && (
+                        <button
+                          onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                          className="p-2.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-all border border-border/50 hover:border-border"
+                          title={isExpanded ? "Collapse" : "View Signal Detail"}
+                        >
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+                      )}
                       <button
                         className="p-2.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-all border border-border/50 hover:border-border"
                         title="Add to Contacts"
@@ -123,17 +225,33 @@ export function InboxView() {
             {handled.map((item) => {
               const config = CLASSIFICATION_CONFIG[item.classification]
               const Icon = config.icon
+              const isExpanded = expandedId === item.id
+              const expandable = hasDetail(item)
               return (
-                <div key={item.id} className="px-6 py-4 opacity-40">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ring-1 ${config.bgColor} ${config.color}`}>
-                      <Icon className="h-3 w-3" />
-                      {config.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{item.date}</span>
+                <div key={item.id} className={`px-6 py-4 ${isExpanded ? '' : 'opacity-40'}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ring-1 ${config.bgColor} ${config.color}`}>
+                          <Icon className="h-3 w-3" />
+                          {config.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{item.date}</span>
+                      </div>
+                      <p className="text-sm text-foreground line-through">{item.subject}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">From: {item.from}</p>
+                      {expandable && isExpanded && <SignalPanel item={item} />}
+                    </div>
+                    {expandable && (
+                      <button
+                        onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                        className="p-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-all border border-border/50 hover:border-border shrink-0"
+                        title={isExpanded ? "Collapse" : "View Signal Detail"}
+                      >
+                        {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                      </button>
+                    )}
                   </div>
-                  <p className="text-sm text-foreground line-through">{item.subject}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">From: {item.from}</p>
                 </div>
               )
             })}

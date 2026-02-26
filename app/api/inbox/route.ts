@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate required fields
-    const { workspace_id, from, subject, preview, classification, recommended_action } = body
+    const { workspace_id, from, subject, preview, classification, recommended_action, signals, rationale, full_text } = body
 
     if (!workspace_id || !from || !subject || !classification) {
       return NextResponse.json(
@@ -35,7 +35,10 @@ export async function POST(request: NextRequest) {
         classification,
         recommended_action,
         handled,
-        date
+        date,
+        signals,
+        rationale,
+        full_text
       )
       VALUES (
         ${workspace_id},
@@ -45,7 +48,10 @@ export async function POST(request: NextRequest) {
         ${classification},
         ${recommended_action || buildDefaultRecommendedAction(classification)},
         false,
-        ${new Date().toISOString().split('T')[0]}
+        ${new Date().toISOString().split('T')[0]},
+        ${signals ? JSON.stringify(signals) : '{}'},
+        ${rationale || null},
+        ${full_text || null}
       )
       RETURNING *
     `

@@ -67,6 +67,16 @@ export interface InboxItem {
   recommendedAction: string
   handled: boolean
   date: string
+  signals?: {
+    timelineClarity?: string
+    locationSpecificity?: string
+    propertyClarity?: string
+    readinessIndicators?: string[]
+    riskTriggers?: string[]
+    [key: string]: unknown
+  }
+  rationale?: string
+  fullText?: string
 }
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]
@@ -132,6 +142,23 @@ function mapPipelineItem(p: any): PipelineItem {
     lastTouch: p.last_touch || '',
     nextAction: p.next_action || '',
     credibilityScore: p.credibility_score || 0,
+  }
+}
+
+function mapInboxItem(i: any): InboxItem {
+  return {
+    id: i.id,
+    workspaceId: i.workspace_id,
+    from: i.from_address,
+    subject: i.subject,
+    preview: i.preview || '',
+    classification: i.classification,
+    recommendedAction: i.recommended_action || '',
+    handled: i.handled,
+    date: i.date ? String(i.date).split('T')[0] : '',
+    signals: i.signals && typeof i.signals === 'object' ? i.signals : undefined,
+    rationale: i.rationale || undefined,
+    fullText: i.full_text || undefined,
   }
 }
 
@@ -206,11 +233,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .catch(err => console.error('Failed to load pipeline:', err))
   }, [])
 
+  const loadInbox = useCallback((workspaceId: string) => {
+    fetch(`/api/inbox?workspace_id=${workspaceId}`)
+      .then(r => r.json())
+      .then(({ items }) => { if (items) setInbox(items.map(mapInboxItem)) })
+      .catch(err => console.error('Failed to load inbox:', err))
+  }, [])
+
   useEffect(() => {
     if (!currentWorkspace) return
     loadContacts(currentWorkspace.id)
     loadPipeline(currentWorkspace.id)
-  }, [currentWorkspace?.id, loadContacts, loadPipeline])
+    loadInbox(currentWorkspace.id)
+  }, [currentWorkspace?.id, loadContacts, loadPipeline, loadInbox])
 
   // Reload on tab focus
   useEffect(() => {
@@ -220,11 +255,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (document.visibilityState === 'visible') {
         loadContacts(id)
         loadPipeline(id)
+        loadInbox(id)
       }
     }
     document.addEventListener('visibilitychange', handle)
     return () => document.removeEventListener('visibilitychange', handle)
-  }, [currentWorkspace?.id, loadContacts, loadPipeline])
+  }, [currentWorkspace?.id, loadContacts, loadPipeline, loadInbox])
 
   const createWorkspace = useCallback((name: string, type: WorkspaceType) => {
     if (!user) return
@@ -372,6 +408,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const handleInboxItem = useCallback((id: string) => {
     setInbox(prev => prev.map(item => item.id === id ? { ...item, handled: true } : item))
+    fetch('/api/inbox', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, handled: true }),
+    }).catch(err => console.error('Failed to mark inbox item handled:', err))
   }, [])
 
   return (

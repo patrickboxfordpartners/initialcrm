@@ -89,6 +89,9 @@ CREATE TABLE inbox_items (
   recommended_action TEXT NOT NULL,
   handled BOOLEAN DEFAULT false,
   date DATE NOT NULL,
+  signals JSONB DEFAULT '{}',
+  rationale TEXT,
+  full_text TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -131,3 +134,9 @@ CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks
 
 CREATE TRIGGER update_inbox_items_updated_at BEFORE UPDATE ON inbox_items
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Migration: add signal fields to existing inbox_items tables
+-- Run these if upgrading from a schema that predates this change
+-- ALTER TABLE inbox_items ADD COLUMN IF NOT EXISTS signals JSONB DEFAULT '{}';
+-- ALTER TABLE inbox_items ADD COLUMN IF NOT EXISTS rationale TEXT;
+-- ALTER TABLE inbox_items ADD COLUMN IF NOT EXISTS full_text TEXT;
