@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { useWorkspace, type PipelineItem } from "@/lib/workspace-context"
-import { Kanban, GripVertical, Calendar, Shield, Plus } from "lucide-react"
+import { Kanban, Calendar, Shield, Plus, X, ChevronDown } from "lucide-react"
 
 const STAGES: { id: PipelineItem["stage"]; label: string }[] = [
   { id: "new", label: "New" },
@@ -20,17 +21,75 @@ const STAGE_COLORS: Record<string, string> = {
 }
 
 function PipelineCard({ item }: { item: PipelineItem }) {
+  const { movePipelineItem, removePipelineItem } = useWorkspace()
+  const [showMove, setShowMove] = useState(false)
+  const [removing, setRemoving] = useState(false)
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-400 bg-emerald-500/15"
     if (score >= 50) return "text-amber-400 bg-amber-500/15"
     return "text-red-400 bg-red-500/15"
   }
 
+  const handleMove = async (stage: PipelineItem["stage"]) => {
+    setShowMove(false)
+    await movePipelineItem(item.id, stage)
+  }
+
+  const handleRemove = async () => {
+    setRemoving(true)
+    await removePipelineItem(item.id)
+  }
+
   return (
-    <div className="group p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/70 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-move">
+    <div className="group relative p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/70 transition-all hover:shadow-lg hover:shadow-primary/5">
       <div className="flex items-start justify-between mb-3">
         <p className="text-sm font-semibold text-foreground flex-1 min-w-0 pr-2">{item.contactName}</p>
-        <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Move stage dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMove(s => !s)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              title="Move stage"
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+            {showMove && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMove(false)} />
+                <div className="absolute right-0 top-full mt-1 w-44 rounded-xl border border-border bg-popover/95 backdrop-blur-sm shadow-2xl z-50 overflow-hidden">
+                  <div className="p-1">
+                    {STAGES.filter(s => s.id !== item.stage).map(s => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleMove(s.id)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors"
+                      >
+                        <span className={`w-2 h-2 rounded-full ${
+                          s.id === "new" ? "bg-blue-400" :
+                          s.id === "active" ? "bg-emerald-400" :
+                          s.id === "hot" ? "bg-amber-400" :
+                          s.id === "under_contract" ? "bg-violet-400" : "bg-muted-foreground"
+                        }`} />
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          {/* Remove */}
+          <button
+            onClick={handleRemove}
+            disabled={removing}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+            title="Remove from pipeline"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-2.5">
@@ -39,9 +98,11 @@ function PipelineCard({ item }: { item: PipelineItem }) {
           <span>{item.lastTouch}</span>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 bg-secondary/50 rounded-lg px-2.5 py-2 border border-border/50">
-          {item.nextAction}
-        </p>
+        {item.nextAction && (
+          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 bg-secondary/50 rounded-lg px-2.5 py-2 border border-border/50">
+            {item.nextAction}
+          </p>
+        )}
 
         {item.credibilityScore > 0 && (
           <div className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg ring-1 ${getScoreColor(item.credibilityScore)}`}>
@@ -58,9 +119,9 @@ function PipelineCard({ item }: { item: PipelineItem }) {
 }
 
 export function PipelineView() {
-  const { pipeline, currentWorkspace } = useWorkspace()
+  const { pipeline, currentWorkspace, setActivePage } = useWorkspace()
 
-  const wsPipeline = pipeline.filter((p) => p.workspaceId === currentWorkspace?.id)
+  const wsPipeline = pipeline.filter(p => p.workspaceId === currentWorkspace?.id)
 
   if (!currentWorkspace) return null
 
@@ -76,14 +137,16 @@ export function PipelineView() {
           </div>
         </div>
         <div className="text-center space-y-2 max-w-md">
-          <h3 className="text-lg font-semibold text-foreground">No Pipeline Items</h3>
+          <h3 className="text-lg font-semibold text-foreground">Pipeline is empty</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Add contacts to your pipeline and track them through your sales stages. Move cards between stages to update their progress.
+            Open a contact in the Contacts view and click "Add to Pipeline" to track it here.
           </p>
         </div>
-        <button className="mt-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add to Pipeline
+        <button
+          onClick={() => setActivePage("contacts")}
+          className="mt-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+        >
+          Go to Contacts
         </button>
       </div>
     )
@@ -92,8 +155,8 @@ export function PipelineView() {
   return (
     <div className="flex-1 overflow-x-auto overflow-y-hidden">
       <div className="flex gap-4 p-6 min-w-max h-full">
-        {STAGES.map((stage) => {
-          const stageItems = wsPipeline.filter((p) => p.stage === stage.id)
+        {STAGES.map(stage => {
+          const stageItems = wsPipeline.filter(p => p.stage === stage.id)
           return (
             <div key={stage.id} className="w-72 shrink-0 flex flex-col">
               <div className="flex items-center justify-between mb-4 px-1">
@@ -106,13 +169,13 @@ export function PipelineView() {
               </div>
 
               <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-                {stageItems.map((item) => (
+                {stageItems.map(item => (
                   <PipelineCard key={item.id} item={item} />
                 ))}
 
                 {stageItems.length === 0 && (
                   <div className="p-8 rounded-xl border-2 border-dashed border-border/50 text-center bg-secondary/20">
-                    <p className="text-xs text-muted-foreground">Drop here</p>
+                    <p className="text-xs text-muted-foreground">Empty</p>
                   </div>
                 )}
               </div>

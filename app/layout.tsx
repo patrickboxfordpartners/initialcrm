@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ClerkProvider } from '@clerk/nextjs'
+import { ExternalLinks } from "@/components/external-links"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+          <ExternalLinks />
           {children}
         </body>
       </html>
